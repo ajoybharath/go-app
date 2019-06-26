@@ -4,6 +4,6 @@ RUN mkdir -p /app
  
 WORKDIR /app
  
-ADD . /app
+COPY app /app
  
 CMD ["./app"]
