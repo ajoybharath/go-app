@@ -1,0 +1,84 @@
+Prerequisites for this is to have the ec2 instance terraformed 
+from the repository demo_cicd master branch
+
+A build a deploy demo with parameterized builds
+
+1. New freestyle job is created
+
+Source Code Management > Git
+
+Repository URL
+
+Build > Execute Shell
+
+export GOROOT=/usr/lib/golang
+export GOPATH=$WORKSPACE
+export PATH=$PATH:$GOROOT/bin
+
+go build app.go
+
+if [ $? -ne 0 ]
+then
+	echo "GO Build failed"
+    exit 1
+else
+	echo "GO Build success"
+fi
+
+Post-build Actions > Build other projects
+
+Projects to build - the next job to start after this (docker build in our case)
+
+Trigger only if build is stable
+
+2. Another freestyle job
+
+Build > Execute Shell
+
+cd ../go-build
+sudo docker build -t $JOB_NAME:$BUILD_NUMBER .
+sudo docker tag $JOB_NAME:$BUILD_NUMBER localhost:5000/$JOB_NAME:$BUILD_NUMBER
+sudo docker push localhost:5000/$JOB_NAME:$BUILD_NUMBER
+
+Post-build Actions > Trigger Parameterized builds 
+
+Projects to build - the next job to start after this (deployment build in our case)
+
+Trigger when build is:
+
+Predefined Parameters
+
+job=$JOB_NAME
+build=$BUILD_NUMBER
+
+3. Another freestyle job
+
+General
+
+This project is parameterized
+
+String parameter > job
+
+String parameter > build
+
+Build > Execute Shell
+
+sudo docker run -d -p 60419:60419 localhost:5000/$job:$build
+
+
+Execute the build and also ou can create pipeline views.
+
+New View - on the left side
+
+View name - 
+
+Build Pipeline View 
+
+Select Initial Job
+
+
+If everthing works as expected you can curl to our jenkins host url which will give you output like below
+
+"Welcome all, This is batch DP060419 :-)"
+
+curl <ip>:60419 
