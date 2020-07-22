@@ -7,7 +7,7 @@ import (
 )
 
 func HomeEndpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome all, This is batch DP060419 :-)")
+	fmt.Fprintln(w, "Welcome all, This is batch DP190120 :-)")
 }
 
 func main() {
